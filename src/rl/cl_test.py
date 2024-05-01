@@ -14,7 +14,7 @@ def test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, outp
     embeddim = 128
     masking = 1
     testsize = 1
-    output_csv = './output_logs/csv/test/' + output_log + '.csv'
+    output_csv = './output_logs/csv/test/ndd' + output_log + '.csv'
     filedir = './output_models/'
     input_model = filedir + input_model + '.tar'
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -70,6 +70,10 @@ def test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, outp
         te_ite,te_total_reward,te_States,te_Log_Prob,te_Prob,te_Action,te_Value,te_reward, te_entropy = test_rollout.play(testsize,testSamples,False,size_search)
         test_reward = np.max(te_total_reward)
 
+        print(f'ta {i+1} with makespan {np.max(te_States[-1]["machine_utilization"])*maxTime}')
+        makespan = np.max(te_States[-1]["machine_utilization"])*maxTime
+
         with open(output_csv, 'a') as f:
-            print('%d, %.4f'%(te_ite,test_reward), file=f)
+            # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
+            print(f'ta{i+1}, {jobs}, {macs}, {test_reward},{int(makespan)}',file=f)
 

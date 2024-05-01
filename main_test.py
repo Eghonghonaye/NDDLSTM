@@ -10,24 +10,24 @@ data_mode = 'ta' # ta, dmu
 # model_lists = ['classic_cl_20_20', 'classic_cl_30_15', 'classic_cl_30_20']    # 3 Done
 # model_lists = ['base_15_15', 'base_20_15', 'base_20_20']   # 4 Done
 # model_lists = ['base_30_15', 'base_30_20']                             # 1 Done
-model_lists = ['base_15_15']    
+model_lists = ['base_50_20']    
 
 for model in model_lists:
     
     input_model = model
     output_log = model
 
-    # POMO
-    search_mode = 'pomo' # beam, pomo, sampling, greedy, active
-    test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, output_log + '_pomo')
+    # # POMO
+    # search_mode = 'pomo' # beam, pomo, sampling, greedy, active
+    # test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, output_log + '_pomo')
 
-    # BEAM
-    search_mode = 'beam' # beam, pomo, sampling, greedy, active
-    test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, output_log + '_beam')
+    # # BEAM
+    # search_mode = 'beam' # beam, pomo, sampling, greedy, active
+    # test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, output_log + '_beam')
 
-    # # SAMPLING
-    search_mode = 'sampling' # beam, pomo, sampling, greedy, active
-    test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, output_log + '_sampling')
+    # # # SAMPLING
+    # search_mode = 'sampling' # beam, pomo, sampling, greedy, active
+    # test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, output_log + '_sampling')
 
     # GREEDY
     search_mode = 'greedy' # beam, pomo, sampling, greedy, active

@@ -25,6 +25,7 @@ class RolloutBeam:
         Value = []
         tr_reward = []
         entropies = []
+        makespans = []
         
         ite = 0
         probs_product = torch.ones(1, self.venv.maxJobs)

@@ -113,7 +113,17 @@ class Solver:
 
                 # print(f"feasible actions are {self.currentState.feasibleSet}")
                 if isAgent:
-                    pass
+                    rlstate = {
+                            'machine_utilization': self.currentState.state['machine_utilization'],
+                            'job_times': self.currentState.state['job_times'],
+                            'job_early_start_time': self.currentState.state['job_early_start_time'],
+                            'precedence': self.currentState.state['precedence'],
+                            'job_state': self.currentState.state['job_state']
+                        }
+                    # normalise with max time
+                    # apply max
+                    # call forward to get action
+                    
                 else:
                     chosenJob = np.random.choice(self.currentState.feasibleSet)
                     # print(f"feasible actions are {chosenJob}")
