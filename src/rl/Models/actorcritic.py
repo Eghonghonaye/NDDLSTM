@@ -101,7 +101,7 @@ class Actor(StateLSTM):
         
         return JobEmbeddings
       
-    def forward(self, State, JobEmbeddings, masking):
+    def forward(self, State, JobEmbeddings, masking, invalid_mask=None):
         # input: State - OrderedDict
         #        masking - 0 or 1
         logsoft = nn.LogSoftmax(1)
@@ -132,7 +132,10 @@ class Actor(StateLSTM):
         # option: do masking 
         # https://arxiv.org/abs/2006.14171 this paper directly set masked action to be a large negative number, say -1e+8
         if masking==1:
-            invalid_action = (State['job_state']==self.ops)*1.0  # BS, num_jobs  
+            if invalid_mask.size != 0:
+                invalid_action = invalid_mask
+            else:
+                invalid_action = (State['job_state']==self.ops)*1.0  # BS, num_jobs  
             LearnActor -= torch.tensor(invalid_action*1e+30,dtype=torch.float64,device=self.device)
             
         prob = F.softmax(LearnActor,dim=1) # BS, num_jobs

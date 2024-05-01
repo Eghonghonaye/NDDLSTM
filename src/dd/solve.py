@@ -32,7 +32,7 @@ class Solver:
         # keep the vertexId
         self.vertexId = 0    
 
-    def solveWithRerun(self,args,isAgent=False,agentType=None,model=None,env=None):
+    def solveWithRerun(self,args,isAgent=False,model=None):
         # problemInstance = self.problem
         solution = self.solution
 
@@ -113,20 +113,43 @@ class Solver:
 
                 # print(f"feasible actions are {self.currentState.feasibleSet}")
                 if isAgent:
+                    # create state and normalise with max time
                     rlstate = {
-                            'machine_utilization': self.currentState.state['machine_utilization'],
-                            'job_times': self.currentState.state['job_times'],
-                            'job_early_start_time': self.currentState.state['job_early_start_time'],
-                            'precedence': self.currentState.state['precedence'],
-                            'job_state': self.currentState.state['job_state']
+                            'machine_utilization': np.expand_dims(self.currentState.state['machine_utilization']/100, axis=0),
+                            'job_times': np.expand_dims(self.currentState.state['job_times']/100, axis=0),
+                            'job_early_start_time': np.expand_dims(self.currentState.state['job_early_start_time']/100, axis=0),
+                            'precedence': np.expand_dims(self.currentState.state['precedence'], axis=0),
+                            'job_state': np.expand_dims(self.currentState.state['job_state'], axis=0)
                         }
-                    # normalise with max time
-                    # apply max
-                    # call forward to get action
                     
+                    # apply mask
+                    invalid_mask = np.ones(self.problem.njobs)
+                    np.put(invalid_mask, self.currentState.feasibleSet,0)
+                    # print(f"invalid mask {invalid_mask}, feasible set {self.currentState.feasibleSet}")
+
+                    # Compute action
+                    with torch.set_grad_enabled(False): # False as not training
+                        actorJobEmb = model["actor"].instance_embed(rlstate)
+                        criticJobEmb = model["critic"].instance_embed(rlstate)
+
+                        prob, log_prob = model["actor"](rlstate,actorJobEmb,1,invalid_mask)
+                        value = model["critic"](rlstate,criticJobEmb)
+
+                    # argmax from probs_product
+                    # probs_product[0].shape = size_seach
+                    # probs_product[1].shape = num actions
+                    
+                    # probs_product = probs_product * prob.cpu() 
+                    probs_product = prob.cpu() 
+                    argmax_prob = np.dstack(np.unravel_index(np.argsort(probs_product.ravel()), probs_product.shape))[0][::-1]
+
+                    # call forward to get action
+                    chosenJob = [argmax_prob[0, 1]][0]
+
                 else:
                     chosenJob = np.random.choice(self.currentState.feasibleSet)
                     # print(f"feasible actions are {chosenJob}")
+
                 self.currentState.feasibleSet = np.delete(self.currentState.feasibleSet, np.argwhere(self.currentState.feasibleSet==chosenJob))
                 if self.currentState.feasibleSet.size != 0:
                     # add the state back to memory

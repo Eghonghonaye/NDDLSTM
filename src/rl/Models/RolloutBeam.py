@@ -66,7 +66,6 @@ class RolloutBeam:
             # probs_product[1].shape = num actions
 
             probs_product = probs_product * prob.cpu() 
-            # argmax_prob = np.dstack(np.unravel_index(np.argsort(prob.cpu().ravel()), prob.shape))[0][::-1]
             argmax_prob = np.dstack(np.unravel_index(np.argsort(probs_product.ravel()), probs_product.shape))[0][::-1]
             ID = []
             action = []
@@ -80,7 +79,6 @@ class RolloutBeam:
                 new_env = deepcopy(self.venv.envs[argmax_prob[k, 0]])
                 envs.append(new_env)
                 new_probs_product[k] *= probs_product[argmax_prob[k, 0]][argmax_prob[k, 1]]
-
             probs_product = new_probs_product/new_probs_product.sum()
 
             self.venv.envs = envs
