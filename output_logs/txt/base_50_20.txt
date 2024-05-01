@@ -1,0 +1,33 @@
+device:  cpu
+problem_sizes:  [6]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1

@@ -1,0 +1,5 @@
+device:  cpu
+problem_sizes:  [0]
+Seed: 0, Invalid-action-masking: 1
+epi: 0, al: -4.15e+01, cl: 1.49e+02, trEntropy: 2.43, teSpan: -27.3250, tr_step: 225, time: 4.50, jobs : 15, ops : 15, adaptive_current_problem : 0
+epi: 10, al: -3.36e+01, cl: 1.01e+02, trEntropy: 2.45, teSpan: -28.3300, tr_step: 2475, time: 46.79, jobs : 15, ops : 15, adaptive_current_problem : 0

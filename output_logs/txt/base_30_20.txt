@@ -1,0 +1,6 @@
+device:  cpu
+problem_sizes:  [6]
+device:  cpu
+problem_sizes:  [6]
+device:  cpu
+problem_sizes:  [6]
