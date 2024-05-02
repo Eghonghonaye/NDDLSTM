@@ -6,6 +6,7 @@ from src.rl.Models.RolloutBeam import *
 from src.rl.Models.RolloutPOMO import *
 from src.rl.Models.RolloutSampling import *
 from torch import optim
+import math
 
 import time
 
@@ -16,6 +17,7 @@ def test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, outp
     testsize = 1
     # output_csv = './output_logs/csv/test/ndd' + output_log + '.csv'
     output_csv = './output_logs/csv/test/ndd' + 'results' + '.csv'
+    output_txt = './output_logs/txt/test/ndd' + 'results' + '.txt'
     filedir = './output_models/'
     input_model = filedir + input_model + '.tar'
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -74,7 +76,12 @@ def test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, outp
         print(f'ta {i+1} with makespan {np.max(te_States[-1]["machine_utilization"])*maxTime}')
         makespan = np.max(te_States[-1]["machine_utilization"])*maxTime
 
+        # assumes theres only 1 env for these greedy tests
         with open(output_csv, 'a') as f:
             # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
-            print(f'ta{i+1}, {jobs}, {macs}, "rl", {test_reward},{int(makespan)}',file=f)
+            print(f'ta{i+1}, {jobs}, {macs}, "rl", {test_reward},{makespan}',file=f)
+
+        with open(output_txt, 'a') as f:
+            print(f'ta{i+1}, {jobs}, {ops}, "rl", - ,{test_venv.envs[0].placement.tolist()}',file=f)
+            # np.savetxt(output_txt, solution.bestSolution.state["placement"], fmt='%d')
 

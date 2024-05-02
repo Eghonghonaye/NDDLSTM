@@ -33,11 +33,6 @@ class DDState:
             return True
         
         if all(self.state["machine_utilization"] <= otherState.state["machine_utilization"]):
-            # print(self.state["job_state"])
-            # print(otherState.state["job_state"])
-            # print("yes I am dominant")
-            # print(self.state["machine_utilization"])
-            # print(otherState.state["machine_utilization"])
             return True
         
         return False

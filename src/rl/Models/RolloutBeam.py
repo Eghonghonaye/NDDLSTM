@@ -36,7 +36,7 @@ class RolloutBeam:
             job_time = np.array([i['job_times'] for i in self.venv.BState])                 # Duration matrix
             job_early = np.array([i['job_early_start_time'] for i in self.venv.BState])
             job_state = np.array(self.venv.BSjobstate)
-            pre = np.array([i['precedence'] for i in self.venv.BState])                     # Machine matrix
+            pre = np.array([i['precedence'] for i in self.venv.BState])                     # Machine matrix  
 
             State = {
                 'machine_utilization': mac_utl,

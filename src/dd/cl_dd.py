@@ -41,6 +41,7 @@ def run(args,model_path='base_50_20'):
         max_data_size = 80
 
     for i in range(max_data_size):
+        output_txt = './output_logs/txt/test/ndd' + 'results' + '.txt'
 
         if data_mode == 'ta':
             problem_ind = i//10 + 2
@@ -53,17 +54,33 @@ def run(args,model_path='base_50_20'):
         if args.algorithm == "dd":
             DDSolver = Solver(path)
             solution = DDSolver.solveWithRerun(args)
-            print(solution)
+            
+            with open(output_csv, 'a') as f:
+                # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
+                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
+
+            with open(output_txt, 'a') as f:
+                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
+                # np.savetxt(output_txt, solution.bestSolution.state["placement"], fmt='%d')
+
         elif args.algorithm == "dd-rl":
             model = load_model(model_path,jobs,ops,device)
             DDSolver = Solver(path)
             solution = DDSolver.solveWithRerun(args,True,model)
+
+            with open(output_csv, 'a') as f:
+                # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
+                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
+
+            with open(output_txt, 'a') as f:
+                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
+                # np.savetxt(output_txt, solution.bestSolution.state["placement"], fmt='%d')
+
         else:
             print(f'You have supplied an unknown algorithm {args.algorithm}')
             sys.exit()
 
-        with open(output_csv, 'a') as f:
-            # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
-            print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
+        
+
 
     
