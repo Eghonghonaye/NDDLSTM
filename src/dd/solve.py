@@ -28,7 +28,7 @@ class Solver:
         # self.searchStrategy = DepthFirst()
         self.searchStrategy = Balanced()
         # self.searchStrategy = BestFirst()
-        self.undominatedStates = {} # Dict of operation status and state Dict(Dict(OperationId,Bool),Dict(StateId,State))
+        self.undominatedStates = {} # Dict of operation status and state Dict(array(jobstate),Dict(StateId,State))
         # keep the vertexId
         self.vertexId = 0    
 
@@ -59,7 +59,8 @@ class Solver:
                         'order':np.zeros((self.problem.nops), dtype=int),
                         'job_done':np.zeros(self.problem.njobs)
                     },
-                feasibleSet=[j for j in range(self.problem.njobs)])
+                feasibleSet=[j for j in range(self.problem.njobs)],
+                lowerBound=0)
 
         allStates.put((allSearchStrategy.getRanking(root,rankFactor=0.5,totalOps=self.problem.njobs*self.problem.nops,bestUpperBound=solution.upperBound),root)) #push tuple of priority and value
         
@@ -161,31 +162,23 @@ class Solver:
                 self.vertexId+=1
                 newState = createChildDDState(self.currentState,chosenJob,self.vertexId,self.problem.nops)
 
-                # if not newState.isFeasible:
-                #     # reached an infeasible end of deep dive
-                #     # add all elements to the original all states queue
-                #     log.info(f'State {newState.id} is infeasible')
-                #     while not deepStates.empty():
-                #         prio, dState = deepStates.get()
-                #         allStates.put((allSearchStrategy.getRanking(dState,rankFactor=0.5,totalOps=problemInstance.njobs*problemInstance.nops,bestUpperBound=solution.upperBound),dState)) #push tuple of priority and value
-                #     break
-
-                if newState.state['max_span'] > solution.upperBound:
-                    print("Worse than current best, restart depth")
+                if newState.state['max_span'] >= solution.upperBound or \
+                            newState.lowerBound >= solution.upperBound:
+                    # print(f"Worse than current best at {newState.state['max_span']} with lowerbound {newState.lowerBound}, restart depth")
                     while not deepStates.empty():
                         prio, dState = deepStates.get()
                         allStates.put((allSearchStrategy.getRanking(dState,rankFactor=0.5,totalOps=self.problem.njobs*self.problem.nops,bestUpperBound=solution.upperBound),dState)) #push tuple of priority and value
                     break
                     # continue
 
-                # if not self.isDominantState(problemInstance,self.undominatedStates,newState):
-                #     log.info(f'State {newState.id} is dominated')
-                #     continue
+                if not self.isDominantState(newState):
+                    # print(f'State {newState.id} is dominated')
+                    continue
 
                 deepStates.put((deepSearchStrategy.getRanking(newState,rankFactor=0.5,totalOps=self.problem.njobs*self.problem.nops,bestUpperBound=solution.upperBound),newState))
 
             # update best lower bound
-            solution.lowerBound = solution.upperBound if allStates.empty() else min(allStates.queue, key = lambda x: x[1].state["max_span"])[1].state["max_span"]#--- inner list of priority queue
+            solution.lowerBound = solution.upperBound if allStates.empty() else min(allStates.queue, key = lambda x: x[1].lowerBound)[1].lowerBound#--- inner list of priority queue
             print(f'best lower bound is {solution.lowerBound}')
             print(f'best upper bound is {solution.upperBound}')
                 
@@ -193,23 +186,25 @@ class Solver:
         
         return solution
     
-    # # TO DO: is undominated states by reference? confirm
-    # def isDominantState(self,problem:Instance,undominatedStates:dict,currentState:DDState):
-    #     if binList2str(currentState.operationStatus.values()) in undominatedStates.keys():
-    #         for undomId,undomState in undominatedStates[binList2str(currentState.operationStatus.values())].items():
-    #             if undomState.isDominant(problem,currentState):
-    #                 return False
+    # TO DO: is undominated states by reference? confirm
+    def isDominantState(self,currentState:DDState):
 
-    #         for undomId,undomState in undominatedStates[binList2str(currentState.operationStatus.values())].items():
-    #             if currentState.isDominant(problem,undomState):
-    #                 undominatedStates[binList2str(currentState.operationStatus.values())].pop(undomId)
-    #                 undominatedStates[binList2str(currentState.operationStatus.values())].update({currentState.id:currentState}) 
+        jobStateKey = '-'.join([str(val) for val in currentState.state["job_state"]])
 
-    #                 undomState.cleanUpPath()
-    #                 undomState.isDominated = True
+        if jobStateKey in self.undominatedStates.keys():
+            for undomId,undomState in self.undominatedStates[jobStateKey].items():
+                if undomState.isDominant(currentState):
+                    # print(f'State {currentState.id} is dominated by {undomId}')
+                    return False
 
-    #     undominatedStates[binList2str(currentState.operationStatus.values())] = {currentState.id:currentState}
-    #     return True
+            for undomId,undomState in list(self.undominatedStates[jobStateKey].items()):
+                if currentState.isDominant(undomState):
+                    self.undominatedStates[jobStateKey].pop(undomId)
+                    self.undominatedStates[jobStateKey].update({currentState.id:currentState}) 
+                    undomState.isDominated = True
+
+        self.undominatedStates[jobStateKey] = {currentState.id:currentState}
+        return True
     
 
         

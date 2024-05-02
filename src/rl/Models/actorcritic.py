@@ -132,7 +132,7 @@ class Actor(StateLSTM):
         # option: do masking 
         # https://arxiv.org/abs/2006.14171 this paper directly set masked action to be a large negative number, say -1e+8
         if masking==1:
-            if invalid_mask.size != 0:
+            if invalid_mask is not None:
                 invalid_action = invalid_mask
             else:
                 invalid_action = (State['job_state']==self.ops)*1.0  # BS, num_jobs  

@@ -16,6 +16,7 @@ class DDState:
     isDominated: bool = False
     isTerminal: bool = False
     feasibleSet: list = field(default_factory=list)
+    lowerBound: int = 0
 
 
     def __eq__(self,other):
@@ -24,6 +25,23 @@ class DDState:
         return self.id < other.id
     def __gt__(self,other):
         return self.id > other.id
+    
+    def isDominant(self,otherState):
+        if any(self.state["job_state"] != otherState.state["job_state"]):
+            print("wrong dominance comparison")
+            sys.exit()
+            return True
+        
+        if all(self.state["machine_utilization"] <= otherState.state["machine_utilization"]):
+            # print(self.state["job_state"])
+            # print(otherState.state["job_state"])
+            # print("yes I am dominant")
+            # print(self.state["machine_utilization"])
+            # print(otherState.state["machine_utilization"])
+            return True
+        
+        return False
+        
 
     
 
@@ -49,6 +67,15 @@ def createChildDDState(ddState:DDState,jobToChoose,vertexId,nops):
     isTerminal = False if newstate["jobs_to_process"] > 0 else True
     feasibleSet = (newstate['job_done']<=0)*1
     feasibleSet = feasibleSet.nonzero()[0]
+    lowerBound = max([newstate["machine_utilization"][m] + 
+                      sum([newstate["job_times"][i][j] for i in range(newstate["job_times"].shape[0]) 
+                                        for j in range(newstate["job_times"].shape[1]) 
+                                        if newstate["precedence"][i][j] == m and newstate["job_state"][i] <= j ])
+                                                               for m in range(nops) ])
+    # print(f'job state is {newstate["job_state"]}')
+    # print(f'job times is {newstate["job_times"]}')
+    # print(f'precedence is {newstate["precedence"]}')
+    # print(f"lowerbound is {lowerBound}")
 
     return DDState(
                 state = newstate,
@@ -57,6 +84,7 @@ def createChildDDState(ddState:DDState,jobToChoose,vertexId,nops):
                 isDominated = isDominated,
                 isTerminal = isTerminal,
                 feasibleSet=feasibleSet,
+                lowerBound=lowerBound,
             )
 
 def createChildState(state:State,jobToChoose,maxJobLength,):
