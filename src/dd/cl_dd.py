@@ -35,9 +35,11 @@ def run(args,model_path='base_50_20'):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     output_csv = './output_logs/csv/test/ndd' + 'results' + '.csv'
 
-    data_mode = 'ta'
+    data_mode = args.data_mode
 
-    if data_mode == 'ta':
+    print(f"Using data mode: {data_mode}")
+
+    if data_mode == 'ta' or data_mode == 'dmu':
         max_data_size = 80
 
     for i in range(max_data_size):
@@ -51,16 +53,30 @@ def run(args,model_path='base_50_20'):
             jobs = data.njobs
             ops = data.nops
 
+        if data_mode == 'dmu':
+            problem_ind = i//10 + 2
+            path = f"./data/dmu/dmu{i+1}.txt"
+
+            data = read_instances(f"./data/dmu/dmu{i+1}.txt",full=True)
+            jobs = data.njobs
+            ops = data.nops
+
         if args.algorithm == "dd":
             DDSolver = Solver(path)
             solution = DDSolver.solveWithRerun(args)
             
             with open(output_csv, 'a') as f:
                 # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
-                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
+                if data_mode == 'ta':
+                    print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
+                if data_mode == 'dmu':
+                    print(f'dmu{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
 
             with open(output_txt, 'a') as f:
-                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
+                if data_mode == 'ta':
+                    print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
+                if data_mode == 'dmu':
+                    print(f'dmu{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
                 # np.savetxt(output_txt, solution.bestSolution.state["placement"], fmt='%d')
 
         elif args.algorithm == "dd-rl":
@@ -70,10 +86,16 @@ def run(args,model_path='base_50_20'):
 
             with open(output_csv, 'a') as f:
                 # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
-                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
+                if data_mode == 'ta':
+                    print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
+                if data_mode == 'dmu':
+                    print(f'dmu{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["max_span"]}',file=f)
 
             with open(output_txt, 'a') as f:
-                print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
+                if data_mode == 'ta':
+                    print(f'ta{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
+                if data_mode == 'dmu':
+                    print(f'dmu{i+1}, {jobs}, {ops}, {args.algorithm}, - ,{solution.bestSolution.state["placement"].tolist()}',file=f)
                 # np.savetxt(output_txt, solution.bestSolution.state["placement"], fmt='%d')
 
         else:

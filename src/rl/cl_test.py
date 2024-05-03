@@ -22,7 +22,7 @@ def test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, outp
     input_model = filedir + input_model + '.tar'
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    if data_mode == 'ta':
+    if data_mode == 'ta' or data_mode == 'dmu':
         max_data_size = 80
 
     for i in range(max_data_size):
@@ -32,6 +32,13 @@ def test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, outp
             data = read_instances('./data/ta/ta{}'.format(i+1))
             jobs = problem_sizes[problem_ind][0]
             macs = problem_sizes[problem_ind][1]
+
+        if data_mode == 'dmu':
+            problem_ind = i//10 + 2
+            data = read_instances(f"./data/dmu/dmu{i+1}.txt")
+            jobs = problem_sizes[problem_ind][0]
+            macs = problem_sizes[problem_ind][1]
+        
         ops = macs
 
         test_precedence,test_timepre_ = data
@@ -73,15 +80,25 @@ def test_model(problem_sizes, maxTime, data_mode, search_mode, input_model, outp
         te_ite,te_total_reward,te_States,te_Log_Prob,te_Prob,te_Action,te_Value,te_reward, te_entropy = test_rollout.play(testsize,testSamples,False,size_search)
         test_reward = np.max(te_total_reward)
 
-        print(f'ta {i+1} with makespan {np.max(te_States[-1]["machine_utilization"])*maxTime}')
+        if data_mode == 'ta':
+            print(f'ta {i+1} with makespan {np.max(te_States[-1]["machine_utilization"])*maxTime}')
+        if data_mode == 'dmu':
+            print(f'dmu {i+1} with makespan {np.max(te_States[-1]["machine_utilization"])*maxTime}')
+
         makespan = np.max(te_States[-1]["machine_utilization"])*maxTime
 
         # assumes theres only 1 env for these greedy tests
         with open(output_csv, 'a') as f:
             # print('%d, %.4f, %d'%(te_ite,test_reward,makespan), file=f)
-            print(f'ta{i+1}, {jobs}, {macs}, "rl", {test_reward},{makespan}',file=f)
+            if data_mode == 'ta':
+                print(f'ta{i+1}, {jobs}, {macs}, "rl", {test_reward},{makespan}',file=f)
+            if data_mode == 'dmu':
+                print(f'dmu{i+1}, {jobs}, {macs}, "rl", {test_reward},{makespan}',file=f)
 
         with open(output_txt, 'a') as f:
-            print(f'ta{i+1}, {jobs}, {ops}, "rl", - ,{test_venv.envs[0].placement.tolist()}',file=f)
+            if data_mode == 'ta':
+                print(f'ta{i+1}, {jobs}, {ops}, "rl", - ,{test_venv.envs[0].placement.tolist()}',file=f)
+            if data_mode == 'dmu':
+                print(f'dmu{i+1}, {jobs}, {ops}, "rl", - ,{test_venv.envs[0].placement.tolist()}',file=f)
             # np.savetxt(output_txt, solution.bestSolution.state["placement"], fmt='%d')
 

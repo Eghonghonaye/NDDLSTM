@@ -42,4 +42,10 @@ def createParser():
                         default=None,
                         required=False,
                         help='path to an already trained model to be used/saved by solver')
+    parser.add_argument('--data_mode', '-dm',
+                        type=str,
+                        action='store',
+                        default="ta",
+                        required=False,
+                        help='data mode choice from [ta, dmu]')
     return parser
